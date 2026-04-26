@@ -26,8 +26,7 @@ const useAuthStore = create((set, get) => ({
 
     if (data.user) {
       set({ user: data.user });
-      
-      // Créer le profil immédiatement
+
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
@@ -39,7 +38,7 @@ const useAuthStore = create((set, get) => ({
         });
 
       if (insertError) {
-        console.warn('Insert profile error (peut être normal):', insertError.message);
+        console.warn('Insert profile error:', insertError.message);
       }
 
       set({ profile: { id: data.user.id, email, shop_name: shopName, phone, plan: 'free' } });
@@ -51,8 +50,6 @@ const useAuthStore = create((set, get) => ({
     if (error) throw error;
 
     set({ user: data.user });
-    
-    // Essayer de récupérer le profil, sinon en créer un
     await get().fetchProfile(data.user.id);
   },
 
@@ -72,10 +69,9 @@ const useAuthStore = create((set, get) => ({
       if (data) {
         set({ profile: data });
       } else {
-        // Profil inexistant, on crée un profil par défaut
         console.log('Profil non trouvé, création...');
         const user = get().user;
-        
+
         const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
           .insert({
@@ -91,14 +87,12 @@ const useAuthStore = create((set, get) => ({
         if (newProfile) {
           set({ profile: newProfile });
         } else if (insertError) {
-          // Même en cas d'erreur, on met un profil minimal pour que l'app fonctionne
           console.warn('Création profil échouée, utilisation profil local:', insertError.message);
           set({ profile: { id: userId, email: user?.email, shop_name: 'Ma Boutique', plan: 'free' } });
         }
       }
     } catch (err) {
       console.error('fetchProfile error:', err);
-      // Même en cas d'erreur totale, on met un profil minimal
       const user = get().user;
       set({ profile: { id: userId, email: user?.email, shop_name: 'Ma Boutique', plan: 'free' } });
     }

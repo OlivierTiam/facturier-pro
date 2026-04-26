@@ -1,9 +1,23 @@
 import { useState } from 'react';
 import useInvoiceStore from '../store/useInvoiceStore';
 
+const templates = [
+  { value: 'classic', label: '🏢 Classique', desc: 'Vert professionnel' },
+  { value: 'mode', label: '💄 Mode & Beauté', desc: 'Violet élégant' },
+  { value: 'food', label: '🍲 Food & Cuisine', desc: 'Orange chaleureux' },
+  { value: 'tech', label: '📱 Tech & Phone', desc: 'Bleu moderne' },
+];
+
 export default function InvoiceForm({ onGenerate }) {
-  const { seller, client, items, setSeller, setClient, addItem, removeItem, updateItem } = useInvoiceStore();
-  const [logoPreview, setLogoPreview] = useState(null);
+  const {
+    seller, client, items, template,
+    setSeller, setClient, setTemplate,
+    addItem, removeItem, updateItem,
+    frequentItems, applyFrequentItems,
+  } = useInvoiceStore();
+
+  const [logoPreview, setLogoPreview] = useState(seller.logo || null);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
@@ -23,6 +37,8 @@ export default function InvoiceForm({ onGenerate }) {
     e.preventDefault();
     onGenerate();
   };
+
+  const selectedTemplate = templates.find(t => t.value === template);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
@@ -101,15 +117,27 @@ export default function InvoiceForm({ onGenerate }) {
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">🛍️ Produits</h2>
-          <button
-            type="button"
-            onClick={addItem}
-            className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-lg hover:bg-green-200 transition"
-          >
-            + Ajouter un produit
-          </button>
+          <div className="flex gap-2">
+            {frequentItems.length > 0 && (
+              <button
+                type="button"
+                onClick={applyFrequentItems}
+                className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-lg hover:bg-purple-200 transition"
+                title="Charger vos produits fréquents"
+              >
+                📋 Produits fréquents
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={addItem}
+              className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-lg hover:bg-green-200 transition"
+            >
+              + Ajouter un produit
+            </button>
+          </div>
         </div>
-        
+
         {items.map((item, index) => (
           <div key={index} className="grid grid-cols-12 gap-2 mb-3 items-end">
             <div className="col-span-5">
@@ -164,6 +192,35 @@ export default function InvoiceForm({ onGenerate }) {
           <span className="text-lg font-bold text-gray-800">Total</span>
           <span className="text-2xl font-bold text-green-700">{total.toLocaleString()} FCFA</span>
         </div>
+      </div>
+
+      {/* Sélecteur de template */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowTemplates(!showTemplates)}>
+          <h2 className="text-lg font-semibold text-gray-800">🎨 Style de facture</h2>
+          <span className="text-sm text-gray-500">{selectedTemplate?.label || 'Classique'}</span>
+        </div>
+        
+        {showTemplates && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+            {templates.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => { setTemplate(t.value); setShowTemplates(false); }}
+                className={`p-3 rounded-lg border-2 text-center transition ${
+                  template === t.value
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="text-xl mb-1">{t.label.split(' ')[0]}</div>
+                <div className="text-xs font-medium text-gray-700">{t.label.split(' ').slice(1).join(' ')}</div>
+                <div className="text-xs text-gray-400 mt-1">{t.desc}</div>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Bouton Générer */}

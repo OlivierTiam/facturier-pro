@@ -2,12 +2,43 @@ import React from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import QRCode from 'qrcode';
 
-// Styles pour le PDF
-const styles = StyleSheet.create({
+// Templates disponibles
+const templateConfigs = {
+  classic: {
+    primary: '#166534',
+    secondary: '#15803d',
+    accent: '#f0fdf4',
+    headerBg: '#166534',
+    font: 'Helvetica',
+  },
+  mode: {
+    primary: '#7c3aed',
+    secondary: '#a855f7',
+    accent: '#faf5ff',
+    headerBg: '#7c3aed',
+    font: 'Helvetica',
+  },
+  food: {
+    primary: '#ea580c',
+    secondary: '#f97316',
+    accent: '#fff7ed',
+    headerBg: '#ea580c',
+    font: 'Helvetica',
+  },
+  tech: {
+    primary: '#2563eb',
+    secondary: '#3b82f6',
+    accent: '#eff6ff',
+    headerBg: '#2563eb',
+    font: 'Courier',
+  },
+};
+
+const createStyles = (t) => StyleSheet.create({
   page: {
     padding: 30,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: t.font,
     position: 'relative',
   },
   header: {
@@ -27,7 +58,7 @@ const styles = StyleSheet.create({
   companyName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#166534', // green-800
+    color: t.primary,
   },
   whatsapp: {
     fontSize: 9,
@@ -37,7 +68,7 @@ const styles = StyleSheet.create({
   invoiceTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#15803d', // green-700
+    color: t.secondary,
     textAlign: 'right',
   },
   invoiceNumber: {
@@ -52,7 +83,7 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   line: {
-    borderBottom: '2px solid #16a34a',
+    borderBottom: `2px solid ${t.secondary}`,
     borderBottomWidth: 2,
     marginVertical: 15,
   },
@@ -63,7 +94,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   clientBox: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: t.accent,
     padding: 10,
     borderRadius: 4,
     marginBottom: 15,
@@ -73,7 +104,7 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#166534',
+    backgroundColor: t.headerBg,
     padding: 6,
     borderRadius: 2,
   },
@@ -98,7 +129,7 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#166534',
+    color: t.primary,
   },
   footer: {
     position: 'absolute',
@@ -116,7 +147,7 @@ const styles = StyleSheet.create({
     top: '45%',
     left: '15%',
     fontSize: 40,
-    color: '#f0fdf4',
+    color: t.accent,
     transform: 'rotate(-30deg)',
     zIndex: -1,
   },
@@ -136,8 +167,10 @@ const styles = StyleSheet.create({
   },
 });
 
-// Composant PDF
-const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark }) => {
+const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark, template = 'classic' }) => {
+  const t = templateConfigs[template] || templateConfigs.classic;
+  const styles = createStyles(t);
+
   const today = new Date().toLocaleDateString('fr-FR', {
     day: '2-digit',
     month: 'long',
@@ -146,34 +179,30 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark }) => {
 
   const total = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
-  // Générer le QR code
   const [qrDataUrl, setQrDataUrl] = React.useState('');
 
   React.useEffect(() => {
     const generateQR = async () => {
       if (seller.phone) {
-        // Lien WhatsApp avec message pré-rempli
         const whatsappUrl = `https://wa.me/${seller.phone.replace(/[^0-9]/g, '')}?text=Bonjour%2C%20je%20viens%20pour%20ma%20commande%20N%C2%B0${invoiceNumber}`;
         const dataUrl = await QRCode.toDataURL(whatsappUrl, {
           width: 100,
           margin: 1,
-          color: { dark: '#166534', light: '#ffffff' },
+          color: { dark: t.primary, light: '#ffffff' },
         });
         setQrDataUrl(dataUrl);
       }
     };
     generateQR();
-  }, [seller.phone, invoiceNumber]);
+  }, [seller.phone, invoiceNumber, t.primary]);
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Filigrane version gratuite */}
         {watermark && (
           <Text style={styles.watermark}>Fait avec Facturier Pro</Text>
         )}
 
-        {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', flex: 1 }}>
             {seller.logo && (
@@ -193,14 +222,12 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark }) => {
 
         <View style={styles.line} />
 
-        {/* Client */}
         <View style={styles.clientBox}>
           <Text style={styles.sectionTitle}>Client</Text>
           <Text>Nom : {client.name}</Text>
           {client.phone && <Text>Téléphone : {client.phone}</Text>}
         </View>
 
-        {/* Tableau des produits */}
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.colDesc]}>Description</Text>
@@ -221,14 +248,12 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark }) => {
           ))}
         </View>
 
-        {/* Total */}
         <View style={styles.totalSection}>
           <Text style={styles.totalText}>
             TOTAL : {total.toLocaleString()} FCFA
           </Text>
         </View>
 
-        {/* Footer avec QR Code */}
         <View style={styles.footer}>
           <View>
             <Text style={styles.footerText}>Facture générée avec Facturier Pro</Text>

@@ -1,26 +1,31 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
-import useAuthStore from './store/useAuthStore';
+import Profile from './pages/Profile';
 import Pricing from './pages/Pricing';
+import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuthStore();
-  
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin text-4xl">⏳</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin text-4xl mb-4">⏳</div>
+          <p className="text-gray-500">Chargement...</p>
+        </div>
       </div>
     );
   }
-  
+
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
-  
+
   return children;
 }
 
@@ -34,9 +39,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route
-          path="/"
+          path="/app"
           element={
             <ProtectedRoute>
               <Home />
@@ -51,7 +58,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/pricing" element={<Pricing />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

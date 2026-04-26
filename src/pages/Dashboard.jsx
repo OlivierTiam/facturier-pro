@@ -19,22 +19,20 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  // Filtrer les factures
-  const filteredInvoices = invoices.filter(inv => 
+  const filteredInvoices = invoices.filter(inv =>
     inv.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     String(inv.invoice_number).includes(searchTerm)
   );
 
-  // Calculer les stats
   const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
   const thisMonth = new Date().getMonth();
   const thisYear = new Date().getFullYear();
-  
+
   const monthlyInvoices = invoices.filter(inv => {
     const d = new Date(inv.created_at);
     return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
   });
-  
+
   const monthlyRevenue = monthlyInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
   const monthlyCount = monthlyInvoices.length;
 
@@ -62,29 +60,23 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-green-700">📊 Tableau de bord</h1>
           <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition"
-            >
-              ➕ Nouvelle facture
+            <h1 className="text-2xl font-bold text-green-700">📊 Tableau de bord</h1>
+            <Link to="/pricing" className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full hover:bg-yellow-100 transition">
+              💎 Upgrade
             </Link>
-            <Link
-                to="/pricing"
-                className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full hover:bg-yellow-100 transition"
-                >
-                💎 Upgrade
+          </div>
+          <div className="flex items-center gap-4">
+            <Link to="/app" className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition">
+              ➕ Nouvelle facture
             </Link>
           </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <p className="text-gray-500 text-sm mb-1">Factures ce mois</p>
@@ -95,14 +87,14 @@ export default function Dashboard() {
               </p>
             )}
           </div>
-          
+
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <p className="text-gray-500 text-sm mb-1">Revenu ce mois</p>
             <p className="text-3xl font-bold text-blue-700">
               {monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span>
             </p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <p className="text-gray-500 text-sm mb-1">Total généré</p>
             <p className="text-3xl font-bold text-purple-700">
@@ -111,7 +103,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recherche */}
         <div className="mb-6">
           <input
             type="text"
@@ -122,7 +113,6 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Liste des factures */}
         {filteredInvoices.length === 0 ? (
           <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-200 text-center">
             <p className="text-4xl mb-4">📭</p>
@@ -132,10 +122,7 @@ export default function Dashboard() {
                 : "Aucune facture ne correspond à votre recherche"}
             </p>
             {invoices.length === 0 && (
-              <Link
-                to="/"
-                className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
-              >
+              <Link to="/app" className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition">
                 Créer ma première facture
               </Link>
             )}
@@ -143,10 +130,7 @@ export default function Dashboard() {
         ) : (
           <div className="space-y-3">
             {filteredInvoices.map((invoice) => (
-              <div
-                key={invoice.id}
-                className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition cursor-pointer"
-              >
+              <div key={invoice.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                   <div className="flex items-start gap-4">
                     <div className="bg-green-100 text-green-700 p-3 rounded-lg">
@@ -165,7 +149,6 @@ export default function Dashboard() {
                       </p>
                     </div>
                   </div>
-                  
                   <div className="flex items-center gap-4 self-end sm:self-center">
                     <div className="text-right">
                       <p className="text-lg font-bold text-green-700">
@@ -182,7 +165,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Total visible */}
         {filteredInvoices.length > 0 && (
           <div className="mt-4 text-right text-sm text-gray-500">
             {filteredInvoices.length} facture{filteredInvoices.length > 1 ? 's' : ''} affichée{filteredInvoices.length > 1 ? 's' : ''}
@@ -190,20 +172,6 @@ export default function Dashboard() {
           </div>
         )}
       </main>
-
-      {/* Navigation mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 sm:hidden">
-        <div className="flex justify-around py-3">
-          <Link to="/" className="text-gray-400 hover:text-green-600 flex flex-col items-center">
-            <span className="text-xl">📝</span>
-            <span className="text-xs">Nouvelle</span>
-          </Link>
-          <Link to="/dashboard" className="text-green-600 flex flex-col items-center">
-            <span className="text-xl">📊</span>
-            <span className="text-xs">Dashboard</span>
-          </Link>
-        </div>
-      </nav>
     </div>
   );
 }

@@ -5,12 +5,12 @@ import useInvoiceStore from '../store/useInvoiceStore';
 import useAuthStore from '../store/useAuthStore';
 
 export default function InvoicePreview({ onBack }) {
-  const { 
-    seller, client, items, invoiceNumber, nextInvoiceNumber,
-    saveInvoice, limitReached 
+  const {
+    seller, client, items, invoiceNumber, nextInvoiceNumber, template,
+    saveInvoice, limitReached,
   } = useInvoiceStore();
   const profile = useAuthStore((state) => state.profile);
-  
+
   const [showViewer, setShowViewer] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -18,8 +18,6 @@ export default function InvoicePreview({ onBack }) {
   const [saved, setSaved] = useState(false);
 
   const total = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
-  
-  // Déterminer si on met le filigrane
   const hasWatermark = profile?.plan === 'free';
 
   const handleSaveAndDownload = async () => {
@@ -48,7 +46,6 @@ export default function InvoicePreview({ onBack }) {
 
   return (
     <div className="space-y-6">
-      {/* Bouton retour */}
       <button
         onClick={onBack}
         className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
@@ -56,7 +53,6 @@ export default function InvoicePreview({ onBack }) {
         ← Retour au formulaire
       </button>
 
-      {/* Résumé */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Aperçu de votre facture</h2>
 
@@ -79,7 +75,6 @@ export default function InvoicePreview({ onBack }) {
           </div>
         </div>
 
-        {/* Badge sauvegardé */}
         {saved && (
           <div className="mt-3 flex items-center gap-2 text-green-600 text-sm">
             <span>✅</span>
@@ -87,25 +82,21 @@ export default function InvoicePreview({ onBack }) {
           </div>
         )}
 
-        {/* Message limite atteinte */}
         {limitReached && (
           <div className="mt-3 bg-red-50 text-red-600 text-sm p-3 rounded-lg">
-            🚫 Vous avez atteint la limite de 3 factures ce mois-ci. 
+            🚫 Vous avez atteint la limite de 3 factures ce mois-ci.
             Passez au plan Starter pour continuer !
           </div>
         )}
       </div>
 
-      {/* Erreur de sauvegarde */}
       {saveError && (
         <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg">
           {saveError}
         </div>
       )}
 
-      {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-4">
-        {/* Bouton Sauvegarder & Télécharger */}
         {!saved ? (
           <button
             onClick={handleSaveAndDownload}
@@ -121,7 +112,6 @@ export default function InvoicePreview({ onBack }) {
             )}
           </button>
         ) : (
-          /* Bouton Télécharger (après sauvegarde) */
           <PDFDownloadLink
             document={
               <InvoicePDF
@@ -130,6 +120,7 @@ export default function InvoicePreview({ onBack }) {
                 items={items}
                 invoiceNumber={invoiceNumber}
                 watermark={hasWatermark}
+                template={template}
               />
             }
             fileName={`Facture_${String(invoiceNumber).padStart(4, '0')}_${client.name.replace(/\s/g, '_')}.pdf`}
@@ -140,7 +131,6 @@ export default function InvoicePreview({ onBack }) {
           </PDFDownloadLink>
         )}
 
-        {/* Bouton aperçu */}
         <button
           onClick={() => setShowViewer(!showViewer)}
           className="flex-1 bg-white text-green-700 border-2 border-green-600 py-3 px-6 rounded-xl font-semibold text-center hover:bg-green-50 transition"
@@ -148,7 +138,6 @@ export default function InvoicePreview({ onBack }) {
           {showViewer ? '🙈 Cacher l\'aperçu' : '👁️ Voir l\'aperçu'}
         </button>
 
-        {/* Bouton nouvelle facture (apparaît après téléchargement) */}
         {downloaded && (
           <button
             onClick={handleNewInvoice}
@@ -159,7 +148,6 @@ export default function InvoicePreview({ onBack }) {
         )}
       </div>
 
-      {/* Aperçu PDF intégré */}
       {showViewer && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style={{ height: '600px' }}>
           <PDFViewer width="100%" height="100%" className="border-0">
@@ -169,12 +157,12 @@ export default function InvoicePreview({ onBack }) {
               items={items}
               invoiceNumber={invoiceNumber}
               watermark={hasWatermark}
+              template={template}
             />
           </PDFViewer>
         </div>
       )}
 
-      {/* Tips selon le plan */}
       {profile?.plan === 'free' ? (
         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl">
           <p className="text-yellow-800 text-sm">

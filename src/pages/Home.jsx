@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import InvoiceForm from '../components/InvoiceForm';
 import InvoicePreview from '../components/InvoicePreview';
 import useInvoiceStore from '../store/useInvoiceStore';
@@ -11,11 +11,13 @@ export default function Home() {
   const resetInvoice = useInvoiceStore((state) => state.resetInvoice);
   const loadSellerFromProfile = useInvoiceStore((state) => state.loadSellerFromProfile);
   const fetchMonthlyCount = useInvoiceStore((state) => state.fetchMonthlyCount);
+  const loadFrequentItems = useInvoiceStore((state) => state.loadFrequentItems);
   const { user, profile, signOut } = useAuthStore();
 
   useEffect(() => {
     if (user) {
       loadSellerFromProfile();
+      loadFrequentItems();
       fetchMonthlyCount().then(setMonthlyCount);
     }
   }, [user]);
@@ -28,24 +30,28 @@ export default function Home() {
 
   const remaining = profile?.plan === 'free' ? 3 - monthlyCount : '∞';
 
+  if (!profile && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Chargement de votre profil...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-green-700">📄 Facturier Pro</h1>
-           <Link
-                to="/dashboard"
-                className="text-sm text-gray-500 hover:text-green-600 transition hidden sm:block"
-            >
-                📊 Dashboard
-            </Link>
-            <Link
-                to="/pricing"
-                className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full hover:bg-yellow-100 transition"
-                >
-                💎 Upgrade
-            </Link>
           <div className="flex items-center gap-4">
+            <Link to="/app" className="text-2xl font-bold text-green-700">📄 Facturier Pro</Link>
+            <Link to="/dashboard" className="text-sm text-gray-500 hover:text-green-600 transition hidden sm:block">
+              📊 Dashboard
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link to="/pricing" className="text-sm text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full hover:bg-yellow-100 transition">
+              💎 Upgrade
+            </Link>
             <span className={`text-sm px-3 py-1 rounded-full ${
               profile?.plan === 'pro'
                 ? 'bg-purple-100 text-purple-700'
@@ -55,10 +61,10 @@ export default function Home() {
             }`}>
               {profile?.plan === 'free' ? `Gratuit (${remaining} restantes)` : profile?.plan}
             </span>
-            <button
-              onClick={signOut}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
+            <Link to="/profile" className="text-sm text-gray-500 hover:text-gray-700">
+              👤 Profil
+            </Link>
+            <button onClick={signOut} className="text-sm text-gray-500 hover:text-gray-700">
               Déconnexion
             </button>
           </div>
