@@ -97,15 +97,15 @@ export default function Auth() {
         {/* Logo & titre */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-3xl font-bold text-green-700 hover:text-green-800 transition">
-            <span className="bg-green-100 p-2 rounded-xl">📄</span>
+            <span className="bg-green-100 p-2 rounded-xl"></span>
             Facturier Pro
           </Link>
           <p className="text-gray-500 mt-3">
             {resetMode
               ? 'Mot de passe oublié ?'
               : isLogin
-              ? 'Content de vous revoir ! 👋'
-              : 'Créez votre compte gratuit 🚀'}
+              ? 'Content de vous revoir ! '
+              : 'Créez votre compte gratuit '}
           </p>
         </div>
 
@@ -123,7 +123,7 @@ export default function Auth() {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  🔑 Connexion
+                   Connexion
                 </button>
                 <button
                   onClick={() => { setIsLogin(false); setError(''); setStep(1); }}
@@ -133,7 +133,7 @@ export default function Auth() {
                       : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  ✨ Inscription
+                   Inscription
                 </button>
               </div>
 
@@ -159,12 +159,12 @@ export default function Auth() {
                 {!isLogin && step === 1 && (
                   <>
                     <div className="bg-green-50 p-3 rounded-xl text-sm text-green-700 mb-2">
-                      💡 Ces infos apparaîtront sur vos factures. Vous pourrez les modifier plus tard.
+                       Ces infos apparaîtront sur vos factures. Vous pourrez les modifier plus tard.
                     </div>
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        🏪 Nom de la boutique
+                         Nom de la boutique
                       </label>
                       <input
                         type="text"
@@ -178,7 +178,7 @@ export default function Auth() {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        📱 WhatsApp
+                         WhatsApp
                       </label>
                       <input
                         type="tel"
@@ -216,7 +216,7 @@ export default function Auth() {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        📧 Email
+                         Email
                       </label>
                       <input
                         type="email"
@@ -231,7 +231,7 @@ export default function Auth() {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                        🔒 Mot de passe
+                         Mot de passe
                       </label>
                       <div className="relative">
                         <input
@@ -250,7 +250,7 @@ export default function Auth() {
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
                           tabIndex={-1}
                         >
-                          {showPassword ? '🙈' : '👁️'}
+                          {showPassword ? '' : ''}
                         </button>
                       </div>
                       {!isLogin && (
@@ -261,7 +261,7 @@ export default function Auth() {
                     {/* Message d'erreur */}
                     {error && (
                       <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-xl flex items-start gap-3">
-                        <span className="text-lg flex-shrink-0">⚠️</span>
+                        <span className="text-lg flex-shrink-0"></span>
                         <span>{error}</span>
                       </div>
                     )}
@@ -269,7 +269,7 @@ export default function Auth() {
                     {/* Message de succès */}
                     {!error && !isLogin && step === 2 && (
                       <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm p-4 rounded-xl flex items-start gap-3">
-                        <span className="text-lg flex-shrink-0">📧</span>
+                        <span className="text-lg flex-shrink-0"></span>
                         <span>Un email de confirmation vous sera envoyé (vérifiez vos spams).</span>
                       </div>
                     )}
@@ -285,9 +285,9 @@ export default function Auth() {
                           Chargement...
                         </>
                       ) : isLogin ? (
-                        '🚀 Se connecter'
+                        ' Se connecter'
                       ) : (
-                        '✨ Créer mon compte gratuit'
+                        ' Créer mon compte gratuit'
                       )}
                     </button>
                   </>
@@ -302,7 +302,7 @@ export default function Auth() {
                     onClick={() => setResetMode(true)}
                     className="w-full text-sm text-gray-500 hover:text-green-600 transition py-2"
                   >
-                    🔑 Mot de passe oublié ?
+                     Mot de passe oublié ?
                   </button>
                 </div>
               )}
@@ -313,7 +313,7 @@ export default function Auth() {
               {resetSent ? (
                 <div className="text-center py-8">
                   <div className="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <span className="text-4xl">📧</span>
+                    <span className="text-4xl"></span>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Email envoyé !</h3>
                   <p className="text-gray-500 text-sm mb-6">
@@ -331,7 +331,7 @@ export default function Auth() {
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="text-center mb-6">
                     <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                      <span className="text-3xl">🔑</span>
+                      <span className="text-3xl"></span>
                     </div>
                     <h3 className="text-lg font-bold text-gray-900">Mot de passe oublié ?</h3>
                     <p className="text-sm text-gray-500 mt-1">
@@ -354,7 +354,7 @@ export default function Auth() {
 
                   {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-4 rounded-xl flex items-start gap-3">
-                      <span>⚠️</span>
+                      <span></span>
                       <span>{error}</span>
                     </div>
                   )}
@@ -370,7 +370,7 @@ export default function Auth() {
                         Envoi en cours...
                       </>
                     ) : (
-                      '📩 Envoyer le lien'
+                      ' Envoyer le lien'
                     )}
                   </button>
 

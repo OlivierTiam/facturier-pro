@@ -1,0 +1,146 @@
+// src/config/plans.js
+
+export const PLANS = {
+  free: {
+    name: 'Gratuit',
+    maxInvoicesPerMonth: 3,
+    hasWatermark: true,
+    canUploadLogo: false,
+    canAccessHistory: false,
+    canAccessStats: false,
+    canExportCSV: false,
+    canManageStock: false,
+    hasUnlimitedInvoices: false,
+    hasPrioritySupport: false,
+    templates: ['classic'],
+    price: 0,
+    color: 'gray',
+  },
+  starter: {
+    name: 'Starter',
+    maxInvoicesPerMonth: 50,
+    hasWatermark: false,
+    canUploadLogo: true,
+    canAccessHistory: true,
+    canAccessStats: false,
+    canExportCSV: false,
+    canManageStock: false,
+    hasUnlimitedInvoices: false,
+    hasPrioritySupport: true,
+    templates: ['classic', 'mode', 'food', 'tech'],
+    price: 1500,
+    color: 'blue',
+  },
+  pro: {
+    name: 'Pro',
+    maxInvoicesPerMonth: Infinity,
+    hasWatermark: false,
+    canUploadLogo: true,
+    canAccessHistory: true,
+    canAccessStats: true,
+    canExportCSV: true,
+    canManageStock: true,
+    hasUnlimitedInvoices: true,
+    hasPrioritySupport: true,
+    templates: ['classic', 'mode', 'food', 'tech'],
+    price: 3000,
+    color: 'purple',
+  },
+};
+
+// Plans pour l'affichage (utilisé dans Pricing.jsx et Landing.jsx)
+export const PLANS_DISPLAY = [
+  {
+    name: 'Gratuit',
+    price: '0',
+    period: 'mois',
+    color: 'gray',
+    planKey: 'free',
+    features: [
+      '3 factures par mois',
+      'Filigrane "Fait avec Facturier Pro"',
+      'QR Code WhatsApp',
+      'Design professionnel',
+      'Téléchargement PDF',
+    ],
+    notIncluded: [
+      'Sans filigrane',
+      'Historique illimité',
+      'Gestion de stock',
+      'Stats avancées',
+    ],
+    cta: 'Commencez gratuitement',
+    popular: false,
+  },
+  {
+    name: 'Starter',
+    price: '1 500',
+    period: 'mois',
+    color: 'blue',
+    planKey: 'starter',
+    features: [
+      '50 factures par mois',
+      'Sans filigrane',
+      'Logo personnalisé',
+      'QR Code WhatsApp',
+      'Historique des factures',
+      'Design professionnel',
+      'Support prioritaire',
+    ],
+    notIncluded: [
+      'Gestion de stock',
+      'Stats avancées',
+    ],
+    cta: 'Choisir Starter',
+    popular: true,
+  },
+  {
+    name: 'Pro',
+    price: '3 000',
+    period: 'mois',
+    color: 'purple',
+    planKey: 'pro',
+    features: [
+      'Factures illimitées',
+      'Sans filigrane',
+      'Logo personnalisé',
+      'QR Code WhatsApp',
+      'Historique illimité',
+      'Gestion de stock simple',
+      'Stats ventes détaillées',
+      'Support WhatsApp 24/7',
+      'Export CSV',
+    ],
+    notIncluded: [],
+    cta: 'Choisir Pro',
+    popular: false,
+  },
+];
+
+// Hook personnalisé pour vérifier les permissions
+export function usePlanPermissions(profile) {
+  const planKey = profile?.plan || 'free';
+  const plan = PLANS[planKey] || PLANS.free;
+
+  return {
+    plan: plan,
+    planName: plan.name,
+    planKey: planKey,
+    maxInvoicesPerMonth: plan.maxInvoicesPerMonth,
+    hasWatermark: plan.hasWatermark,
+    canUploadLogo: plan.canUploadLogo,
+    canAccessHistory: plan.canAccessHistory,
+    canAccessStats: plan.canAccessStats,
+    canExportCSV: plan.canExportCSV,
+    canManageStock: plan.canManageStock,
+    hasUnlimitedInvoices: plan.hasUnlimitedInvoices,
+    hasPrioritySupport: plan.hasPrioritySupport,
+    templates: plan.templates,
+    price: plan.price,
+    color: plan.color,
+    isFree: planKey === 'free',
+    isStarter: planKey === 'starter',
+    isPro: planKey === 'pro',
+    isPaid: planKey !== 'free',
+  };
+}

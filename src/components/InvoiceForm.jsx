@@ -1,20 +1,30 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import useInvoiceStore from '../store/useInvoiceStore';
+import { usePlanPermissions } from '../config/plans';
+import useAuthStore from '../store/useAuthStore';
 
-const templates = [
-  { value: 'classic', label: '🏢 Classique', desc: 'Vert professionnel' },
-  { value: 'mode', label: '💄 Mode & Beauté', desc: 'Violet élégant' },
-  { value: 'food', label: '🍲 Food & Cuisine', desc: 'Orange chaleureux' },
-  { value: 'tech', label: '📱 Tech & Phone', desc: 'Bleu moderne' },
+const allTemplates = [
+  { value: 'classic', label: ' Classique', desc: 'Vert professionnel', plan: 'free' },
+  { value: 'mode', label: ' Mode & Beauté', desc: 'Violet élégant', plan: 'starter' },
+  { value: 'food', label: ' Food & Cuisine', desc: 'Orange chaleureux', plan: 'starter' },
+  { value: 'tech', label: ' Tech & Phone', desc: 'Bleu moderne', plan: 'starter' },
 ];
 
-export default function InvoiceForm({ onGenerate }) {
+export default function InvoiceForm({ onGenerate, limitReached }) {
   const {
     seller, client, items, template,
     setSeller, setClient, setTemplate,
     addItem, removeItem, updateItem,
     frequentItems, applyFrequentItems,
   } = useInvoiceStore();
+
+  const profile = useAuthStore((state) => state.profile);
+  const permissions = usePlanPermissions(profile);
+
+  // Filtrer les templates disponibles selon le plan
+  const availableTemplates = allTemplates.filter(t => permissions.templates.includes(t.value));
+  const lockedTemplates = allTemplates.filter(t => !permissions.templates.includes(t.value));
 
   const [logoPreview, setLogoPreview] = useState(seller.logo || null);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -38,13 +48,20 @@ export default function InvoiceForm({ onGenerate }) {
     onGenerate();
   };
 
-  const selectedTemplate = templates.find(t => t.value === template);
+  const selectedTemplate = allTemplates.find(t => t.value === template);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Section Vendeur */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">🏪 Infos vendeur</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold text-gray-800"> Infos vendeur</h2>
+          {!permissions.canUploadLogo && (
+            <span className="text-xs bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full">
+               Logo en Starter
+            </span>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nom de la boutique</label>
@@ -69,13 +86,25 @@ export default function InvoiceForm({ onGenerate }) {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Logo (optionnel)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Logo {!permissions.canUploadLogo && '(Premium)'}
+            </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleLogoUpload}
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+              disabled={!permissions.canUploadLogo}
+              className={`w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold ${
+                permissions.canUploadLogo
+                  ? 'file:bg-green-50 file:text-green-700 hover:file:bg-green-100'
+                  : 'file:bg-gray-100 file:text-gray-400 cursor-not-allowed opacity-60'
+              }`}
             />
+            {!permissions.canUploadLogo && (
+              <p className="text-xs text-yellow-600 mt-1">
+                <Link to="/pricing" className="hover:underline">Passez au plan Starter</Link> pour ajouter votre logo
+              </p>
+            )}
           </div>
           {logoPreview && (
             <div className="flex items-center">
@@ -87,7 +116,7 @@ export default function InvoiceForm({ onGenerate }) {
 
       {/* Section Client */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">👤 Client</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-4"> Client</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nom du client</label>
@@ -125,7 +154,7 @@ export default function InvoiceForm({ onGenerate }) {
                 className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-lg hover:bg-purple-200 transition"
                 title="Charger vos produits fréquents"
               >
-                📋 Produits fréquents
+                 Produits fréquents
               </button>
             )}
             <button
@@ -196,40 +225,88 @@ export default function InvoiceForm({ onGenerate }) {
 
       {/* Sélecteur de template */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowTemplates(!showTemplates)}>
-          <h2 className="text-lg font-semibold text-gray-800">🎨 Style de facture</h2>
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => setShowTemplates(!showTemplates)}
+        >
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-800"> Style de facture</h2>
+            {lockedTemplates.length > 0 && (
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                {availableTemplates.length}/{allTemplates.length} dispos
+              </span>
+            )}
+          </div>
           <span className="text-sm text-gray-500">{selectedTemplate?.label || 'Classique'}</span>
         </div>
-        
+
         {showTemplates && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-            {templates.map((t) => (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => { setTemplate(t.value); setShowTemplates(false); }}
-                className={`p-3 rounded-lg border-2 text-center transition ${
-                  template === t.value
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="text-xl mb-1">{t.label.split(' ')[0]}</div>
-                <div className="text-xs font-medium text-gray-700">{t.label.split(' ').slice(1).join(' ')}</div>
-                <div className="text-xs text-gray-400 mt-1">{t.desc}</div>
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              {availableTemplates.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => { setTemplate(t.value); setShowTemplates(false); }}
+                  className={`p-3 rounded-lg border-2 text-center transition ${
+                    template === t.value
+                      ? 'border-green-500 bg-green-50 shadow-md'
+                      : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                  }`}
+                >
+                  <div className="text-xl mb-1">{t.label.split(' ')[0]}</div>
+                  <div className="text-xs font-medium text-gray-700">{t.label.split(' ').slice(1).join(' ')}</div>
+                  <div className="text-xs text-gray-400 mt-1">{t.desc}</div>
+                </button>
+              ))}
+
+              {/* Templates verrouillés */}
+              {lockedTemplates.map((t) => (
+                <div
+                  key={t.value}
+                  className="p-3 rounded-lg border-2 border-gray-100 bg-gray-50 text-center opacity-50 cursor-not-allowed relative"
+                >
+                  <div className="absolute top-1 right-1 text-xs">🔒</div>
+                  <div className="text-xl mb-1">{t.label.split(' ')[0]}</div>
+                  <div className="text-xs font-medium text-gray-400">{t.label.split(' ').slice(1).join(' ')}</div>
+                  <div className="text-xs text-gray-300 mt-1">{t.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            {lockedTemplates.length > 0 && (
+              <div className="mt-3 text-center">
+                <Link
+                  to="/pricing"
+                  className="text-xs text-yellow-600 hover:underline"
+                >
+                   Débloquez tous les templates avec le plan Starter (1 500 FCFA/mois)
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* Bouton Générer */}
       <button
         type="submit"
-        className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-green-700 transition shadow-lg"
+        disabled={limitReached}
+        className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold text-lg hover:bg-green-700 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        📥 Générer la facture PDF
+        {limitReached ? ' Limite atteinte ce mois-ci' : ' Générer la facture PDF'}
       </button>
+
+      {limitReached && (
+        <div className="text-center">
+          <Link
+            to="/pricing"
+            className="text-sm text-yellow-600 hover:underline"
+          >
+             Passez au plan Starter pour continuer →
+          </Link>
+        </div>
+      )}
     </form>
   );
 }

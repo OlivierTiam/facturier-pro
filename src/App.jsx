@@ -6,6 +6,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Pricing from './pages/Pricing';
+import Stock from './pages/Stock';
 import useAuthStore from './store/useAuthStore';
 
 function ProtectedRoute({ children }) {
@@ -63,6 +64,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stock"
+          element={
+            <ProtectedRoute>
+              <Stock />
             </ProtectedRoute>
           }
         />

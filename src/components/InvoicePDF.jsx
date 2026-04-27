@@ -184,7 +184,8 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark, template 
   React.useEffect(() => {
     const generateQR = async () => {
       if (seller.phone) {
-        const whatsappUrl = `https://wa.me/${seller.phone.replace(/[^0-9]/g, '')}?text=Bonjour%2C%20je%20viens%20pour%20ma%20commande%20N%C2%B0${invoiceNumber}`;
+        const phoneClean = seller.phone.replace(/[^0-9]/g, '');
+        const whatsappUrl = `https://wa.me/${phoneClean}?text=Bonjour%2C%20je%20viens%20pour%20ma%20commande%20N%C2%B0${invoiceNumber}`;
         const dataUrl = await QRCode.toDataURL(whatsappUrl, {
           width: 100,
           margin: 1,
@@ -196,6 +197,14 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark, template 
     generateQR();
   }, [seller.phone, invoiceNumber, t.primary]);
 
+  // ✅ Fonction pour vérifier si l'image est valide
+  const isValidImage = (src) => {
+    if (!src) return false;
+    if (typeof src !== 'string') return false;
+    if (src.startsWith('http') || src.startsWith('data:image/')) return true;
+    return false;
+  };
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -205,8 +214,13 @@ const InvoicePDF = ({ seller, client, items, invoiceNumber, watermark, template 
 
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', flex: 1 }}>
-            {seller.logo && (
+            {/* ✅ Afficher le logo seulement s'il est valide */}
+            {isValidImage(seller.logo) ? (
               <Image src={seller.logo} style={styles.logo} />
+            ) : (
+              <View style={[styles.logo, { backgroundColor: '#f0fdf4', borderRadius: 8, alignItems: 'center', justifyContent: 'center' }]}>
+                <Text style={{ fontSize: 24 }}>🏪</Text>
+              </View>
             )}
             <View style={styles.companyInfo}>
               <Text style={styles.companyName}>{seller.name || 'Ma Boutique'}</Text>

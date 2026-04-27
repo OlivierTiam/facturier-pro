@@ -34,7 +34,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center gap-2">
-              <span className="text-2xl">📄</span>
+              <span className="text-2xl"></span>
               <span className="text-xl font-bold text-green-700">Facturier Pro</span>
             </Link>
             <div className="hidden sm:flex items-center gap-6">
@@ -107,7 +107,7 @@ export default function Landing() {
                 <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 border-2 border-dashed border-gray-200">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <span className="text-3xl">📄</span>
+                      <span className="text-3xl"></span>
                     </div>
                     <div className="h-3 w-32 bg-gray-200 rounded mx-auto mb-2"></div>
                     <div className="h-2 w-24 bg-gray-100 rounded mx-auto mb-6"></div>
@@ -148,7 +148,7 @@ export default function Landing() {
               </div>
               {/* Badge flottant */}
               <div className="absolute -top-6 -right-6 bg-yellow-400 text-gray-900 px-4 py-2 rounded-xl font-bold shadow-lg transform rotate-6 animate-bounce-slow">
-                ⚡ 30 secondes
+                 30 secondes
               </div>
             </div>
           </div>
@@ -190,55 +190,55 @@ export default function Landing() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                emoji: '⚡',
+                emoji: '',
                 title: 'Ultra rapide',
                 desc: 'Créez une facture en 30 secondes. Remplissez les champs, générez le PDF, envoyez au client.',
                 color: 'bg-yellow-50 text-yellow-600',
               },
               {
-                emoji: '📱',
+                emoji: '',
                 title: 'QR Code WhatsApp',
                 desc: 'Ajoutez un QR code qui ouvre directement une conversation WhatsApp avec le numéro de commande.',
                 color: 'bg-green-50 text-green-600',
               },
               {
-                emoji: '🎨',
+                emoji: '',
                 title: '4 templates pros',
                 desc: 'Classique, Mode & Beauté, Food, Tech. Choisissez le style qui correspond à votre activité.',
                 color: 'bg-purple-50 text-purple-600',
               },
               {
-                emoji: '🖼️',
+                emoji: '',
                 title: 'Logo personnalisé',
                 desc: 'Ajoutez le logo de votre boutique. Vos factures reflètent votre marque.',
                 color: 'bg-blue-50 text-blue-600',
               },
               {
-                emoji: '📊',
+                emoji: '',
                 title: 'Dashboard & stats',
                 desc: 'Suivez vos ventes, retrouvez toutes vos factures, filtrez par client ou date.',
                 color: 'bg-pink-50 text-pink-600',
               },
               {
-                emoji: '🔒',
+                emoji: '',
                 title: 'Sauvegarde sécurisée',
                 desc: 'Toutes vos factures sont stockées en ligne. Plus jamais de perte de carnet.',
                 color: 'bg-indigo-50 text-indigo-600',
               },
               {
-                emoji: '💰',
+                emoji: '',
                 title: 'Paiement Mobile Money',
                 desc: 'Passez au plan payant par MoMo ou Orange Money. Simple et rapide.',
                 color: 'bg-orange-50 text-orange-600',
               },
               {
-                emoji: '📋',
+                emoji: '',
                 title: 'Produits fréquents',
                 desc: 'Sauvegardez vos articles récurrents. Gagnez encore plus de temps.',
                 color: 'bg-teal-50 text-teal-600',
               },
               {
-                emoji: '🌟',
+                emoji: '',
                 title: 'Zéro pub, zéro distraction',
                 desc: 'Une interface propre et claire. Concentrez-vous sur l\'essentiel : vos factures.',
                 color: 'bg-red-50 text-red-600',
@@ -270,9 +270,9 @@ export default function Landing() {
 
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {[
-              { step: '1', emoji: '📝', title: 'Remplissez', desc: 'Nom du client, articles, prix. 30 secondes.' },
-              { step: '2', emoji: '👀', title: 'Vérifiez', desc: 'Aperçu en direct. Modifiez si besoin.' },
-              { step: '3', emoji: '📥', title: 'Téléchargez', desc: 'PDF propre. Envoyez sur WhatsApp direct.' },
+              { step: '1', emoji: '', title: 'Remplissez', desc: 'Nom du client, articles, prix. 30 secondes.' },
+              { step: '2', emoji: '', title: 'Vérifiez', desc: 'Aperçu en direct. Modifiez si besoin.' },
+              { step: '3', emoji: '', title: 'Téléchargez', desc: 'PDF propre. Envoyez sur WhatsApp direct.' },
             ].map((step, i) => (
               <div key={i} className="text-center relative">
                 <div className="w-20 h-20 bg-green-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg">
@@ -380,19 +380,19 @@ export default function Landing() {
                 quote: "Avant je faisais mes factures sur un carnet. Maintenant mes clientes me prennent au sérieux. Le QR code WhatsApp, c'est magique !",
                 name: "Gloria M.",
                 shop: "Gloria Hair",
-                emoji: "💇‍♀️",
+                emoji: "",
               },
               {
                 quote: "Je vends des téléphones sur Facebook. Facturier Pro m'aide à garder une trace de toutes mes ventes. Dashboard utile !",
                 name: "Ibrahim T.",
                 shop: "Tonton Phone",
-                emoji: "📱",
+                emoji: "",
               },
               {
                 quote: "Simple, rapide, professionnel. Je l'ai recommandé à toutes mes amies vendeuses de jus. 1500 FCFA c'est rien pour ce que ça apporte.",
                 name: "Christelle K.",
                 shop: "Jus Naturel Pro",
-                emoji: "🧃",
+                emoji: "",
               },
             ].map((testimonial, i) => (
               <div key={i} className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
@@ -459,7 +459,7 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-3 gap-8 text-center sm:text-left">
             <div>
-              <h3 className="text-white font-bold text-lg mb-3">📄 Facturier Pro</h3>
+              <h3 className="text-white font-bold text-lg mb-3"> Facturier Pro</h3>
               <p className="text-gray-400 text-sm">
                 L'outil de facturation simple pour les vendeurs WhatsApp au Cameroun.
               </p>

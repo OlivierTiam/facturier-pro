@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import useAuthStore from './useAuthStore';
+import { PLANS } from '../config/plans';
 
 const useInvoiceStore = create((set, get) => ({
   seller: { name: '', phone: '', logo: null },
@@ -121,6 +122,36 @@ const useInvoiceStore = create((set, get) => ({
     }
     return 0;
   },
+  canCreateInvoice: () => {
+  const profile = useAuthStore.getState().profile;
+  const plan = PLANS[profile?.plan] || PLANS.free;
+  
+  if (plan.hasUnlimitedInvoices) return true;
+  
+  // Vérifier le compteur mensuel
+  return get().fetchMonthlyCount().then(count => count < plan.maxInvoicesPerMonth);
+},
+
+// Obtenir le nombre maximum de factures
+getMaxInvoices: () => {
+  const profile = useAuthStore.getState().profile;
+  const plan = PLANS[profile?.plan] || PLANS.free;
+  return plan.hasUnlimitedInvoices ? '∞' : plan.maxInvoicesPerMonth;
+},
+
+// Vérifier si le filigrane est nécessaire
+hasWatermark: () => {
+  const profile = useAuthStore.getState().profile;
+  const plan = PLANS[profile?.plan] || PLANS.free;
+  return plan.hasWatermark;
+},
+
+// Templates disponibles selon le plan
+getAvailableTemplates: () => {
+  const profile = useAuthStore.getState().profile;
+  const plan = PLANS[profile?.plan] || PLANS.free;
+  return plan.templates;
+},
 }));
 
 export default useInvoiceStore;

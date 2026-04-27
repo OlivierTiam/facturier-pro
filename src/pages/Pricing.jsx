@@ -1,111 +1,61 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
-
-const plans = [
-  {
-    name: 'Gratuit',
-    price: '0',
-    period: 'mois',
-    color: 'gray',
-    features: [
-      '3 factures par mois',
-      'Filigrane "Fait avec Facturier Pro"',
-      'QR Code WhatsApp',
-      'Design professionnel',
-      'Téléchargement PDF',
-    ],
-    notIncluded: [
-      'Sans filigrane',
-      'Historique illimité',
-      'Gestion de stock',
-      'Stats avancées',
-    ],
-    cta: 'Commencez gratuitement',
-    popular: false,
-  },
-  {
-    name: 'Starter',
-    price: '1 500',
-    period: 'mois',
-    color: 'blue',
-    features: [
-      '50 factures par mois',
-      'Sans filigrane',
-      'Logo personnalisé',
-      'QR Code WhatsApp',
-      'Historique des factures',
-      'Design professionnel',
-      'Support prioritaire',
-    ],
-    notIncluded: [
-      'Gestion de stock',
-      'Stats avancées',
-    ],
-    cta: 'Choisir Starter',
-    popular: true,
-  },
-  {
-    name: 'Pro',
-    price: '3 000',
-    period: 'mois',
-    color: 'purple',
-    features: [
-      'Factures illimitées',
-      'Sans filigrane',
-      'Logo personnalisé',
-      'QR Code WhatsApp',
-      'Historique illimité',
-      'Gestion de stock simple',
-      'Stats ventes détaillées',
-      'Support WhatsApp 24/7',
-      'Export CSV',
-    ],
-    notIncluded: [],
-    cta: 'Choisir Pro',
-    popular: false,
-  },
-];
+import usePaymentStore from '../store/usePaymentStore';
+import { PLANS_DISPLAY } from '../config/plans';
 
 export default function Pricing() {
   const { user, profile } = useAuthStore();
+  const { processPayment, loading: paymentLoading, error: paymentError, success: paymentSuccess, reset } = usePaymentStore();
+  const navigate = useNavigate();
+  
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [localError, setLocalError] = useState('');
+
+  // Rediriger après paiement réussi
+  useEffect(() => {
+    if (paymentSuccess) {
+      const timer = setTimeout(() => {
+        navigate('/app', { replace: true });
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [paymentSuccess, navigate]);
 
   const currentPlan = profile?.plan || 'free';
 
   const handleSelectPlan = (plan) => {
     if (!user) {
-      // Rediriger vers l'inscription
       window.location.href = '/auth';
       return;
     }
+    
+    if (plan.planKey === 'free') {
+      window.location.href = '/app';
+      return;
+    }
+    
     setSelectedPlan(plan);
     setShowPayment(true);
-    setPaymentError('');
-    setPaymentSuccess(false);
+    setLocalError('');
+    reset();
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
-    setPaymentLoading(true);
-    setPaymentError('');
+    setLocalError('');
 
-    // Simuler l'appel à Campay
-    // Dans la vraie vie, on ferait un appel API à Campay ici
-    setTimeout(() => {
-      // Simulation réussie
-      setPaymentSuccess(true);
-      setPaymentLoading(false);
-      
-      // Mettre à jour le plan localement (en vrai, ce serait via webhook)
-      const updatedProfile = { ...profile, plan: selectedPlan.name.toLowerCase() };
-      useAuthStore.setState({ profile: updatedProfile });
-    }, 3000);
+    if (!phoneNumber || phoneNumber.length < 8) {
+      setLocalError('Veuillez entrer un numéro Mobile Money valide');
+      return;
+    }
+
+    const success = await processPayment(selectedPlan.planKey, phoneNumber);
+    if (!success) {
+      setLocalError(paymentError || 'Erreur lors du paiement');
+    }
   };
 
   const getColorClasses = (color) => {
@@ -140,15 +90,15 @@ export default function Pricing() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-green-700">📄 Facturier Pro</h1>
+          <Link to="/" className="text-2xl font-bold text-green-700">📄 Facturier Pro</Link>
           <div className="flex items-center gap-3">
             {user ? (
               <>
                 <Link to="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">
-                  📊 Dashboard
+                   Dashboard
                 </Link>
-                <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-                  📝 Nouvelle facture
+                <Link to="/app" className="text-sm text-gray-500 hover:text-gray-700">
+                   Nouvelle facture
                 </Link>
               </>
             ) : (
@@ -167,15 +117,20 @@ export default function Pricing() {
             Des tarifs simples, sans surprise
           </h2>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-            Choisissez le plan qui correspond à votre activité. 
+            Choisissez le plan qui correspond à votre activité.
             Passez à un plan supérieur quand vous voulez.
           </p>
+          {profile?.plan !== 'free' && (
+            <div className="mt-4 inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm">
+               Plan actuel : <strong>{profile?.plan === 'starter' ? 'Starter' : 'Pro'}</strong>
+            </div>
+          )}
         </div>
 
         {/* Grille des plans */}
         {!showPayment ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan) => (
+            {PLANS_DISPLAY.map((plan) => (
               <div
                 key={plan.name}
                 className={`rounded-2xl p-8 border-2 relative ${getColorClasses(plan.color)} ${
@@ -188,7 +143,7 @@ export default function Pricing() {
                   </div>
                 )}
 
-                {currentPlan === plan.name.toLowerCase() && (
+                {currentPlan === plan.planKey && (
                   <div className="absolute top-3 right-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
                     Plan actuel
                   </div>
@@ -222,19 +177,19 @@ export default function Pricing() {
 
                 <button
                   onClick={() => handleSelectPlan(plan)}
-                  disabled={currentPlan === plan.name.toLowerCase() || plan.name === 'Gratuit'}
+                  disabled={currentPlan === plan.planKey && plan.planKey !== 'free'}
                   className={`w-full py-3 rounded-xl font-semibold transition ${
-                    currentPlan === plan.name.toLowerCase()
+                    currentPlan === plan.planKey && plan.planKey !== 'free'
                       ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                      : plan.name === 'Gratuit'
-                      ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                      : plan.planKey === 'free'
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       : getButtonClasses(plan.color)
                   }`}
                 >
-                  {currentPlan === plan.name.toLowerCase() 
-                    ? '✓ Plan actuel' 
-                    : plan.name === 'Gratuit' 
-                    ? 'Plan par défaut' 
+                  {currentPlan === plan.planKey && plan.planKey !== 'free'
+                    ? '✓ Plan actuel'
+                    : plan.planKey === 'free'
+                    ? profile?.plan === 'free' ? 'Plan actuel' : 'Revenir au gratuit'
                     : plan.cta}
                 </button>
               </div>
@@ -244,13 +199,13 @@ export default function Pricing() {
           /* Formulaire de paiement */
           <div className="max-w-md mx-auto">
             <button
-              onClick={() => setShowPayment(false)}
+              onClick={() => { setShowPayment(false); reset(); }}
               className="text-gray-500 hover:text-gray-700 mb-6 flex items-center gap-2"
             >
               ← Retour aux offres
             </button>
 
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Paiement {selectedPlan?.name}
               </h3>
@@ -263,10 +218,10 @@ export default function Pricing() {
                   <div className="text-6xl mb-4">🎉</div>
                   <h4 className="text-xl font-bold text-green-700 mb-2">Paiement réussi !</h4>
                   <p className="text-gray-500 mb-6">
-                    Vous êtes maintenant sur le plan {selectedPlan?.name} !
+                    Vous êtes maintenant sur le plan <strong>{selectedPlan?.name}</strong> pour 30 jours !
                   </p>
                   <Link
-                    to="/"
+                    to="/app"
                     className="inline-block bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                   >
                     Commencer à créer des factures
@@ -276,7 +231,7 @@ export default function Pricing() {
                 <form onSubmit={handlePayment} className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Numéro Mobile Money
+                      📱 Numéro Mobile Money
                     </label>
                     <input
                       type="tel"
@@ -293,40 +248,50 @@ export default function Pricing() {
 
                   <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl">
                     <p className="text-yellow-800 text-sm">
-                      📱 Une notification de paiement sera envoyée sur votre téléphone. 
+                      📱 Une notification de paiement sera envoyée sur votre téléphone.
                       Validez le paiement en entrant votre code secret.
                     </p>
                   </div>
 
-                  {paymentError && (
+                  {(localError || paymentError) && (
                     <div className="bg-red-50 text-red-600 text-sm p-3 rounded-xl">
-                      {paymentError}
+                      {localError || paymentError}
                     </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={paymentLoading}
-                    className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                    className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {paymentLoading ? (
-                      <span className="flex items-center justify-center gap-2">
+                      <>
                         <span className="animate-spin">⏳</span>
                         En attente du paiement...
-                      </span>
+                      </>
                     ) : (
                       `Payer ${selectedPlan?.price} FCFA`
                     )}
                   </button>
 
                   <p className="text-xs text-gray-400 text-center">
-                    Paiement sécurisé via MTN Mobile Money et Orange Money
+                    Paiement sécurisé • Abonnement valable 30 jours
                   </p>
                 </form>
               )}
             </div>
           </div>
         )}
+
+        {/* Garantie */}
+        <div className="max-w-3xl mx-auto mt-12 text-center">
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
+            <p className="text-gray-500 text-sm">
+              🔒 Paiement 100% sécurisé via <strong>MTN Mobile Money</strong> et <strong>Orange Money</strong>.
+              Pas de renouvellement automatique. Vous gardez le contrôle.
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   );
